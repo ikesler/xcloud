@@ -1,0 +1,54 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model XCloud.Api.Models.PasskeyViewModel
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@Localizer["PasskeyProtectedShare"]</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="@Url.Content("~/styles.css")" rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/png" href="/favicon.ico" />
+
+</head>
+
+<body class="max-width mx-auto px3 ltr">
+<div class="content index py4">
+
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <header>
+            <h1 class="posttitle" itemprop="name headline">
+                @Localizer["ThisShareIsProtectedByPasskey"]
+            </h1>
+        </header>
+
+        <div class="content" itemprop="articleBody">
+            <form method="post">
+                <div style="display: flex; flex-direction: row; gap: 16px; align-items: start;">
+                    <div>@Localizer["Passkey"]</div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <input type="password" name="passkey" value="" required />
+                        @if (Model.InvalidPasskey)
+                        {
+                            <div id="errorMessage" class="cactus-error-text">@Localizer["PasskeyInvalid"]</div>
+                        }
+                    </div>
+                    <button type="submit" onclick="document.getElementById('errorMessage')?.remove()">@Localizer["Send"]</button>
+                </div>
+            </form>
+        </div>
+    </article>
+
+    <footer id="footer">
+        <div class="footer-left" style="width: 100%; display: flex; flex-direction: row; justify-content: center; gap: 8px">
+            <span>&copy; Copyright 2020-@DateTime.Now.Year</span> <a href="https://logrus.dev">logrus.dev</a>
+        </div>
+    </footer>
+
+</div>
+</body>
+
+</html>

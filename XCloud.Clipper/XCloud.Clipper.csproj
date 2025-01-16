@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XCloud.Common\XCloud.Common.csproj" />
+    <ProjectReference Include="..\XCloud.Helpers\XCloud.Helpers.csproj" />
+    <ProjectReference Include="..\XCloud.Core\XCloud.Core.csproj" />
+    <ProjectReference Include="..\XCloud.Storage\XCloud.Storage.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Flurl.Http" Version="4.0.2" />
+    <PackageReference Include="Markdig" Version="0.37.0" />
+    <PackageReference Include="MimeMapping" Version="3.0.1" />
+    <PackageReference Include="QuickEPUB" Version="1.2.0" />
+    <PackageReference Include="ReverseMarkdown" Version="4.6.0" />
+    <PackageReference Include="Scriban" Version="5.11.0" />
+    <PackageReference Include="SmartReader" Version="0.9.6" />
+  </ItemGroup>
+</Project>

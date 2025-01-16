@@ -1,0 +1,10 @@
+.git
+.idea
+.vs
+.vscode
+**/[b|B]in
+**/[O|o]bj
+Dockerfile
+web
+.env
+

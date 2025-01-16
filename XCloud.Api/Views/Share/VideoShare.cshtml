@@ -1,0 +1,43 @@
+﻿@model XCloud.Sharing.Api.Dto.Shares.VideoShare
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="@Url.Content("~/styles.css")" rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/png" href="/favicon.ico" />
+
+</head>
+
+<body class="max-width mx-auto px3 ltr">
+<div class="content index py4">
+
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <header>
+            <h1 class="posttitle" itemprop="name headline">
+                
+            </h1>
+        </header>
+
+        <div class="content" itemprop="articleBody">
+            <video controls autoplay>
+                <source src="@Model.ContentUrl" type="video/mp4">
+            </video>
+        </div>
+    </article>
+
+    <footer id="footer">
+        <div class="footer-left">
+            Copyright  &copy; 2023  logrus.dev
+        </div>
+    </footer>
+
+</div>
+</body>
+
+</html>

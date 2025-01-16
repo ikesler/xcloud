@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XCloud.Core\XCloud.Core.csproj" />
+    <ProjectReference Include="..\XCloud.Helpers\XCloud.Helpers.csproj" />
+    <ProjectReference Include="..\XCloud.Storage\XCloud.Storage.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DotNext.Threading" Version="5.13.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.1" />
+    <PackageReference Include="Polly" Version="8.4.2" />
+    <PackageReference Include="Polly.Extensions" Version="8.4.2" />
+    <PackageReference Include="Scriban" Version="5.11.0" />
+  </ItemGroup>
+</Project>
