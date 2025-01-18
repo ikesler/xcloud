@@ -10,7 +10,6 @@ using XCloud.Sharing.Api.Dto.Shares;
 using XCloud.Sharing.Settings;
 using static System.String;
 using static XCloud.Helpers.Paths;
-using static System.Uri;
 
 namespace XCloud.Sharing.Impl.Renderers;
 
@@ -65,8 +64,10 @@ public class MarkdownRenderer(Crypto crypto, IOptions<ShareSettings> shareSettin
         foreach (var link in mdoc.Descendants().OfType<LinkInline>())
         {
             if (IsNullOrWhiteSpace(link.Url)) continue;
+            // Only relative
+            if (Uri.TryCreate(link.Url, UriKind.Absolute, out _)) continue;
 
-            var absolutePath = ResolveRelativePath(UnescapeDataString(link.Url), parentPath);
+            var absolutePath = ResolveRelativePath(Uri.UnescapeDataString(link.Url), parentPath);
             if (IsNullOrWhiteSpace(absolutePath)) continue;
             var childShareKey = crypto.GetShareKey(absolutePath);
             var ext = Path(absolutePath).Extension;
