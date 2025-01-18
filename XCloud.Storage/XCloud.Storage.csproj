@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XCloud.Core\XCloud.Core.csproj" />
+    <ProjectReference Include="..\XCloud.Ext\XCloud.Ext.csproj" />
     <ProjectReference Include="..\XCloud.Helpers\XCloud.Helpers.csproj" />
   </ItemGroup>
 </Project>

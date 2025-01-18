@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Options;
+using XCloud.Ext.Storage;
 using XCloud.Storage.Api;
 using XCloud.Storage.Settings;
 
 namespace XCloud.Storage.Impl.LocalFS;
 
-public class LocalFsStorage(IOptions<StorageSettings> storageSettings) : IStorage
+public class LocalFsStorageProvider(IOptions<StorageSettings> storageSettings) : IStorageProvider
 {
     private readonly StorageSettings _storageSettings = storageSettings.Value;
 

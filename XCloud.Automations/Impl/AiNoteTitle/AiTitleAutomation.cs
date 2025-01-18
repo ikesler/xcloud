@@ -4,9 +4,10 @@ using Microsoft.Extensions.Options;
 using OpenAI;
 using OpenAI.Chat;
 using Serilog;
-using XCloud.Automations.Api;
 using XCloud.Automations.Settings;
 using XCloud.Core.Metadata;
+using XCloud.Ext.Automation;
+using XCloud.Ext.Storage;
 using XCloud.Helpers;
 using XCloud.Storage.Api;
 
@@ -117,7 +118,7 @@ public class AiTitleAutomation(IStorage storage,
         var completion = await _client
             .CompleteChatAsync([new UserChatMessage(contentWithoutFrontmatter)], new ChatCompletionOptions
             {
-                MaxOutputTokenCount = 20 // Enforcing short responses
+                MaxOutputTokenCount = 50 // Enforcing short responses
             });
         if (completion.Value.FinishReason == ChatFinishReason.Length)
         {

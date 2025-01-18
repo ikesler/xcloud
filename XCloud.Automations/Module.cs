@@ -7,6 +7,7 @@ using XCloud.Automations.Impl.AiNoteTitle;
 using XCloud.Automations.Jobs;
 using XCloud.Automations.Settings;
 using XCloud.Core;
+using XCloud.Ext.Automation;
 
 namespace XCloud.Automations;
 

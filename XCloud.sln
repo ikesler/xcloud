@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XCloud.Common", "XCloud.Com
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XCloud.Automations", "XCloud.Automations\XCloud.Automations.csproj", "{FE754DA2-94CF-48F1-AED3-717A9CB87382}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XCloud.Ext", "XCloud.Ext\XCloud.Ext.csproj", "{0729F38D-335B-4796-A903-5F183FEFE828}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +68,9 @@ Global
 		{FE754DA2-94CF-48F1-AED3-717A9CB87382}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE754DA2-94CF-48F1-AED3-717A9CB87382}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE754DA2-94CF-48F1-AED3-717A9CB87382}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0729F38D-335B-4796-A903-5F183FEFE828}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0729F38D-335B-4796-A903-5F183FEFE828}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0729F38D-335B-4796-A903-5F183FEFE828}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0729F38D-335B-4796-A903-5F183FEFE828}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

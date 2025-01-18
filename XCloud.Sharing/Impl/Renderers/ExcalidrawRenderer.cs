@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Serilog;
+using XCloud.Ext.Storage;
 using XCloud.Helpers;
 using XCloud.Sharing.Api.Dto.Shares;
 using XCloud.Sharing.Settings;

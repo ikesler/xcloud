@@ -1,4 +1,5 @@
 ﻿using XCloud.Automations.Api;
+using XCloud.Ext.Automation;
 using XCloud.Storage.Api;
 
 namespace XCloud.Automations.Impl;
