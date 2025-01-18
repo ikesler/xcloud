@@ -33,13 +33,13 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
         var html = await PostProcess(article.Content, fileName, ctx);
 
         var mdown = converter.Convert(html);
-        if (string.IsNullOrWhiteSpace(mdown))
+        if (string.IsNullOrWhiteSpace(mdown) && !string.IsNullOrWhiteSpace(ctx.OriginalHtml))
         {
             mdown = converter.Convert(await PostProcess(ctx.OriginalHtml, fileName, ctx));
         }
         mdown = (await GetFrontmatter(ctx, article)).PrependYamlTag(mdown);
 
-        await storage.Put(path, ToStream(mdown));
+        await storage.Put(path, mdown.ToStream());
     }
 
     public async Task ClipBookmark(ClipRequest clipRequest)
@@ -52,15 +52,15 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
             "xcloud_bookmark.liquid",
             new
             {
-                Title = article.Title,
-                Url = clipRequest.Url,
+                article.Title,
+                clipRequest.Url,
                 Image = await SaveResource(fileName, article.FeaturedImage, ctx),
-                Excerpt = article.Excerpt,
-                Byline = article.Byline,
+                article.Excerpt,
+                article.Byline,
             }) ?? clipRequest.Url.ToString();
         mdown = (await GetFrontmatter(ctx, article)).PrependYamlTag(mdown);
 
-        await storage.Put(path, ToStream(mdown));
+        await storage.Put(path, mdown.ToStream());
     }
 
     public async Task ClipEpub(ClipRequest clipRequest)
@@ -195,16 +195,17 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
             }
         }
 
+        var body = e.QuerySelector("body");
         if (settings.DomainSelectorsToInclude.TryGetValue(host, out var includeSelector))
         {
             var includeElement = e.QuerySelector(includeSelector);
-            if (includeElement != null)
+            if (includeElement != null && body != null)
             {
-                e.QuerySelector("body").InnerHtml = includeElement.OuterHtml;
+                body.InnerHtml = includeElement.OuterHtml;
             }
             else
             {
-                Log.Error("Include selector not found: {Selector}", includeSelector);
+                Log.Error("Include selector or body not found: {Selector}, {Body}", includeSelector, body);
             }
         }
 
@@ -219,10 +220,10 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
             }
         }
 
-        ctx.OriginalHtml = e.QuerySelector("body").InnerHtml;
+        ctx.OriginalHtml = body?.InnerHtml;
         ctx.OgMetaTags = e.QuerySelectorAll("meta[property^=og]")
-            .DistinctBy(x => x.GetAttribute("property"))
-            .ToDictionary(x => x.GetAttribute("property"), x => x.GetAttribute("content"));
+            .DistinctBy(x => x.GetAttribute("property") ?? "")
+            .ToDictionary(x => x.GetAttribute("property") ?? "", x => x.GetAttribute("content") ?? "");
     }
 
     private async Task<string> PostProcess(string content, string fileName, ClipContext ctx)
@@ -276,10 +277,5 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
         var imagePath = $"{baseImagePath}/{Guid.NewGuid()}{extension}";
         await storage.Put($"{ctx.ClipperSettings.ResourcesBasePath}/{imagePath}", imageStream);
         return $"{ctx.ClipperSettings.ResourcesRelativePath}/{imagePath}";
-    }
-
-    private static Stream ToStream(string inputString)
-    {
-        return new MemoryStream(System.Text.Encoding.UTF8.GetBytes(inputString));
     }
 }

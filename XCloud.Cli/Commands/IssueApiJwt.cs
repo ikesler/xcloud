@@ -14,7 +14,7 @@ public class IssueApiJwt : ICommand
         Description = "Key for signing the token")]
     public string Key { get; init; } = null!;
 
-    public async ValueTask ExecuteAsync(IConsole console)
+    public ValueTask ExecuteAsync(IConsole console)
     {
         console.Output.WriteLine("Using private key: {0}", Key);
         var signingKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Key));
@@ -29,5 +29,6 @@ public class IssueApiJwt : ICommand
         );
         var tt = new JwtSecurityTokenHandler();
         console.Output.WriteLine(tt.WriteToken(jwt));
+        return ValueTask.CompletedTask;
     }
 }
