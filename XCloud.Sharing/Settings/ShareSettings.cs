@@ -2,8 +2,8 @@
 
 public class ShareSettings
 {
-    public string BasePublicUrl { get; set; } = null!;
-    public string ShareKeyPepper { get; set; } = null!;
-    public string ExcalidrawEmbeddingBasePath { get; set; } = null!;
+    public required string BasePublicUrl { get; init; }
+    public required string ShareKeyPepper { get; init; }
+    public required string ExcalidrawEmbeddingBasePath { get; init; }
     public int ExcalidrawEmbeddingQuotaBytes { get; set; }
 }

@@ -13,7 +13,7 @@ public class Templater(IStorage storage): ITemplater
         var templatePath = Path.Combine(baseDir, templateName);
         if (!await storage.Exists(templatePath)) return null;
 
-        var template = await storage.Get(templatePath, 0, null);
+        var template = await storage.Get(templatePath);
         if (template == null) return null;
 
         using var templateReader = new StreamReader(template.Content);
