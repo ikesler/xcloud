@@ -1,7 +1,6 @@
 ﻿using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using DotNext.Threading;
 using Polly;
 using Polly.Registry;
@@ -13,6 +12,7 @@ using XCloud.Helpers;
 using XCloud.ReadEra.Constants;
 using XCloud.ReadEra.Models;
 using XCloud.Storage.Api;
+using static XCloud.Helpers.Paths;
 
 namespace XCloud.ReadEra.Impl;
 
@@ -51,16 +51,13 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
 
     private async Task<Dictionary<string, string>> LoadCitationTemplates(ReadEraSettings readEraSettings)
     {
+        var templateDir = Path(readEraSettings.TemplatesDirectory);
         var files = Enum
             .GetValues<ReadEraColor>()
             .SelectMany(mark =>
             {
-                var main = ($"{mark}", path: Path.Combine(
-                    readEraSettings.TemplatesDirectory,
-                    $"cit_{mark}.liquid"));
-                var alt = ($"{mark}_alt", path: Path.Combine(
-                    readEraSettings.TemplatesDirectory,
-                    $"cit_{mark}_alt.liquid"));
+                var main = ($"{mark}", path: templateDir / $"cit_{mark}.liquid");
+                var alt = ($"{mark}_alt", path: templateDir / $"cit_{mark}_alt.liquid");
                 return new[] { main, alt };
             });
         var result = new Dictionary<string, string>();
@@ -69,7 +66,7 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
             var storageItem = await storage.Get(path);
             if (storageItem != null)
             {
-                result[mark] = storageItem.Content.ReadAllString();
+                result[mark] = await storageItem.Content.ReadAllStringAsync();
             }
         }
 
@@ -78,16 +75,14 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
 
     private async Task<Dictionary<string, string>> LoadWordTemplates(ReadEraSettings readEraSettings)
     {
+        var templateDir = Path(readEraSettings.TemplatesDirectory);
+
         var dictionaries = Enum.GetValues<ReadEraDictionary>();
         var files = dictionaries
             .SelectMany(dic =>
             {
-                var main = ($"{dic}", path: Path.Combine(
-                    readEraSettings.TemplatesDirectory,
-                    $"word_{dic}.liquid"));
-                var alt = ($"{dic}_alt", path: Path.Combine(
-                    readEraSettings.TemplatesDirectory,
-                    $"word_{dic}_alt.liquid"));
+                var main = ($"{dic}", path: templateDir / $"word_{dic}.liquid");
+                var alt = ($"{dic}_alt", path: templateDir / $"word_{dic}_alt.liquid");
                 return new[] { main, alt };
             });
         var result = new Dictionary<string, string>();
@@ -96,7 +91,7 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
             var storageItem = await storage.Get(path);
             if (storageItem != null)
             {
-                result[mark] = storageItem.Content.ReadAllString();
+                result[mark] = await storageItem.Content.ReadAllStringAsync();
             }
         }
 
@@ -115,15 +110,7 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
         var now = await storage.LocalTime();
         var docTitle = string.IsNullOrWhiteSpace(doc.Data.DocTitle) ? doc.Data.DocFileNameTitle : doc.Data.DocTitle;
         Log.Information("ReadEraImporter: processing document {Title}", docTitle);
-        var mdFileName = Regex.Replace(
-            docTitle,
-            @"[^0-9\p{L}_\-\. ]",
-            "_",
-            RegexOptions.IgnoreCase)
-            .Trim(' ', '_') + ".md";
-        var mdFilePath = Path.Combine(
-            settings.ReadEra.NotesDirectory,
-            mdFileName);
+        var mdFilePath = Path(settings.ReadEra.NotesDirectory) / docTitle.EscapeFileName() + ".md";
 
         var storageItem = await storage.Get(mdFilePath);
         var (parsedFrontmatter, bodyWithoutMeta) = storageItem == null

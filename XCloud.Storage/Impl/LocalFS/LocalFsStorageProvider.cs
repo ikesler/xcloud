@@ -11,6 +11,8 @@ public class LocalFsStorageProvider(IOptions<StorageSettings> storageSettings) :
 
     public Task Rm(string key)
     {
+        if (_storageSettings.ReadOnly) return Task.CompletedTask;
+
         var path = Path.Combine(_storageSettings.LocalFSRoot, key);
         File.Delete(path);
         return Task.CompletedTask;
@@ -94,6 +96,8 @@ public class LocalFsStorageProvider(IOptions<StorageSettings> storageSettings) :
 
     public async Task Put(string key, Stream content)
     {
+        if (_storageSettings.ReadOnly) return;
+
         var path = Path.Combine(_storageSettings.LocalFSRoot, key);
         var directory = Path.GetDirectoryName(path);
         if (directory != null && !Directory.Exists(directory)) Directory.CreateDirectory(directory);
