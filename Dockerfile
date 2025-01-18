@@ -11,6 +11,7 @@ COPY ./XCloud.Helpers/XCloud.Helpers.csproj XCloud.Helpers/
 COPY ./XCloud.ReadEra/XCloud.ReadEra.csproj XCloud.ReadEra/
 COPY ./XCloud.Common/XCloud.Common.csproj XCloud.Common/
 COPY ./XCloud.Automations/XCloud.Automations.csproj XCloud.Automations/
+COPY ./XCloud.Ext/XCloud.Ext.csproj XCloud.Ext/
 RUN dotnet restore XCloud.Api/XCloud.Api.csproj
 
 COPY . .
