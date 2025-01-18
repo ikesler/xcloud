@@ -84,8 +84,8 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
         if (share != null)
         {
             frontmatter ??= new Frontmatter();
-            frontmatter.share ??= new();
-            frontmatter.share.shared = share.Value;
+            frontmatter.Share ??= new();
+            frontmatter.Share.shared = share.Value;
             var mdown = frontmatter.PrependYamlTag(bodyWithoutMeta);
             await storage.Put(path, mdown.ToStream());
         }
@@ -105,10 +105,10 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
                     title);
             }).ToArray();
         var shareKey = crypto.GetShareKey(path);
-        var accessKey = IsNullOrWhiteSpace(frontmatter?.share?.passkey)
+        var accessKey = IsNullOrWhiteSpace(frontmatter?.Share?.passkey)
             ? null
-            : crypto.GetShareAccessToken(shareKey, frontmatter.share.passkey);
-        var shared = frontmatter?.share?.shared ?? false;
+            : crypto.GetShareAccessToken(shareKey, frontmatter.Share.passkey);
+        var shared = frontmatter?.Share?.shared ?? false;
 
         // To get updated timestamp
         var storageMetaItem = await storage.Stat(path)
@@ -120,8 +120,8 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
             linkedShareKeys,
             accessKey,
             shared,
-            frontmatter?.share?.index ?? false,
-            frontmatter?.title ?? Path(path).FileNameWithoutExtension,
+            frontmatter?.Share?.index ?? false,
+            frontmatter?.Title ?? Path(path).FileNameWithoutExtension,
             storageMetaItem.Checksum());
     }
 
@@ -270,7 +270,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
             var (frontmatter, bodyWithoutMeta) = Frontmatter.Parse(await storageItem.Content.ReadAllStringAsync());
             if (frontmatter != null)
             {
-                frontmatter.share = null;
+                frontmatter.Share = null;
                 var mdown = frontmatter.PrependYamlTag(bodyWithoutMeta);
                 await storage.Put(sfi.Path, mdown.ToStream());
             }

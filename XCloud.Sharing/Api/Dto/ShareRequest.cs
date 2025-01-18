@@ -2,5 +2,5 @@
 
 public class ShareRequest
 {
-    public string Path { get; set; }
+    public required string Path { get; init; }
 }

@@ -3,5 +3,5 @@
 public class ReadEraSettings
 {
     public required string NotesDirectory { get; init; }
-    public string TemplatesDirectory { get; init; }
+    public required string TemplatesDirectory { get; init; }
 }

@@ -5,8 +5,8 @@ namespace XCloud.Sharing.Api.Dto.Shares;
 
 public class MarkdownShare: ShareBase
 {
-    public string Title { get; set; }
-    public string Body { get; set; }
-    public string? OgMeta { get; set; }
+    public required string Title { get; init; }
+    public required string Body { get; init; }
+    public string? OgMeta { get; init; }
     public NavigationInfo? Nav { get; set; }
 }

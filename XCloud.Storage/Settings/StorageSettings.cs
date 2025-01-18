@@ -2,5 +2,5 @@
 
 public class StorageSettings
 {
-    public string LocalFSRoot { get; set; }
+    public required string LocalFSRoot { get; init; }
 }

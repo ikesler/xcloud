@@ -4,8 +4,8 @@ namespace XCloud.Api.Controllers;
 public class ErrorController : Controller
 {
     [Route("/error/{code:int}")]
-    public async Task<IActionResult> GetErrorPage(int code)
+    public Task<IActionResult> GetErrorPage(int code)
     {
-        return View("NotFound");
+        return Task.FromResult<IActionResult>(View("NotFound"));
     }
 }

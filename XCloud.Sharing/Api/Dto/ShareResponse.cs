@@ -2,5 +2,5 @@
 
 public class ShareResponse
 {
-    public string Url { get; set; }
+    public required string Url { get; init; }
 }

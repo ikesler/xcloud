@@ -4,23 +4,24 @@ using XCloud.Storage.Settings;
 
 namespace XCloud.Storage.Impl.LocalFS;
 
-public class LocalFSStorage(IOptions<StorageSettings> storageSettings) : IStorage
+public class LocalFsStorage(IOptions<StorageSettings> storageSettings) : IStorage
 {
     private readonly StorageSettings _storageSettings = storageSettings.Value;
 
-    public async Task Rm(string key)
+    public Task Rm(string key)
     {
         var path = Path.Combine(_storageSettings.LocalFSRoot, key);
         File.Delete(path);
+        return Task.CompletedTask;
     }
 
-    public async Task<StorageMetaItem[]> Ls(string keyPrefix)
+    public Task<StorageMetaItem[]> Ls(string keyPrefix)
     {
         var path = Path.Combine(_storageSettings.LocalFSRoot, keyPrefix);
         var di = new DirectoryInfo(path);
-        if (!di.Exists) return [];
+        if (!di.Exists) return Task.FromResult<StorageMetaItem[]>([]);
 
-        return di.EnumerateFileSystemInfos()
+        return Task.FromResult(di.EnumerateFileSystemInfos()
             .Select(x => new StorageMetaItem(
                 x.Name,
                 Path.Combine(keyPrefix, x.Name),
@@ -32,16 +33,17 @@ public class LocalFSStorage(IOptions<StorageSettings> storageSettings) : IStorag
                 x is FileInfo fi
                     ? fi.Length
                     : null))
-            .ToArray();
+            .ToArray());
     }
 
-    public async Task<StorageMetaItem?> Stat(string key)
+    public Task<StorageMetaItem?> Stat(string key)
     {
+        StorageMetaItem? result = null;
         var path = Path.Combine(_storageSettings.LocalFSRoot, key);
-        if (Directory.Exists(path))
+        var di = new DirectoryInfo(path);
+        if (di.Exists)
         {
-            var di = new DirectoryInfo(path);
-            return new StorageMetaItem(
+            result = new StorageMetaItem(
                 di.Name,
                 path,
                 StorageMetaItemType.Directory,
@@ -50,34 +52,43 @@ public class LocalFSStorage(IOptions<StorageSettings> storageSettings) : IStorag
                 null);
         }
         var fi = new FileInfo(path);
-        return new StorageMetaItem(
-            fi.Name,
-            path,
-            StorageMetaItemType.File,
-            fi.CreationTimeUtc,
-            fi.LastWriteTimeUtc,
-            fi.Length);
+        if (fi.Exists)
+        {
+            result = new StorageMetaItem(
+                fi.Name,
+                path,
+                StorageMetaItemType.File,
+                fi.CreationTimeUtc,
+                fi.LastWriteTimeUtc,
+                fi.Length);
+        }
+
+        return Task.FromResult(result);
     }
 
-    public async Task<bool> Exists(string key)
+    public Task<bool> Exists(string key)
     {
         var path = Path.Combine(_storageSettings.LocalFSRoot, key);
-        return File.Exists(path);
+        return Task.FromResult(File.Exists(path));
     }
 
-    public async Task<StorageItem?> Get(string key, long firstByte, long? lastByte)
+    public Task<StorageItem?> Get(string key, long firstByte, long? lastByte)
     {
         var path = Path.Combine(_storageSettings.LocalFSRoot, key);
         var fileName = Path.GetFileName(path);
-        if (!File.Exists(path)) return null;
 
+        StorageItem? result = null;
         var fi = new FileInfo(path);
+        if (fi.Exists)
+        {
+            result = new StorageItem(
+                fileName,
+                File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
+                fi.Length,
+                fi.LastWriteTimeUtc);
+        }
 
-        return new StorageItem(
-            fileName,
-            File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-            fi.Length,
-            fi.LastWriteTimeUtc);
+        return Task.FromResult(result);
     }
 
     public async Task Put(string key, Stream content)

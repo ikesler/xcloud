@@ -18,7 +18,7 @@ public class Clip : ICommand
 
     public async ValueTask ExecuteAsync(IConsole console)
     {
-        var clipper = new Clipper.Impl.Clipper(new LocalFSStorage(Options.Create(new StorageSettings
+        var clipper = new Clipper.Impl.Clipper(new LocalFsStorage(Options.Create(new StorageSettings
         {
             LocalFSRoot = @"D:\tmp\epub"
         })), null!);

@@ -2,9 +2,9 @@
 
 public class ExcalidrawShare: ShareBase
 {
-    public string Title { get; set; }
-    public string CompressedDrawingData { get; set; }
-    public Dictionary<string, EmbeddedFile> EmbeddedFiles { get; set; }
+    public required string Title { get; init; }
+    public required string CompressedDrawingData { get; init; }
+    public required Dictionary<string, EmbeddedFile> EmbeddedFiles { get; init; }
 }
 
 public record EmbeddedFile(string MimeType, string Base64Content);

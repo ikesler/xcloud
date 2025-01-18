@@ -14,7 +14,7 @@ public class Module: IModule
 {
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<IStorage, LocalFSStorage>();
+        services.AddTransient<IStorage, LocalFsStorage>();
         services.AddOptions<StorageSettings>().Bind(configuration.GetSection(nameof(StorageSettings)));
     }
 }

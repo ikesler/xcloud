@@ -131,15 +131,15 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
             : Frontmatter.Parse(await storageItem.Content.ReadAllStringAsync());
         var frontmatter = parsedFrontmatter ?? new Frontmatter
         {
-            created_at = now.ToString("s"),
-            updated_at = now.ToString("s"),
-            title = doc.Data.DocTitle,
-            author = doc.Data.DocAuthors,
-            readera_timestamp = 0,
-            readera_uri = doc.Uri
+            CreatedAt = now.ToString("s"),
+            UpdatedAt = now.ToString("s"),
+            Title = doc.Data.DocTitle,
+            Author = doc.Data.DocAuthors,
+            ReaderaTimestamp = 0,
+            ReaderaUri = doc.Uri
         };
 
-        var timestamp = frontmatter.readera_timestamp ?? 0;
+        var timestamp = frontmatter.ReaderaTimestamp ?? 0;
 
         var entries = doc.Citations
             .Where(x => x.NoteModifiedTime > timestamp)
@@ -174,12 +174,12 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
             }
         }
 
-        frontmatter.readera_timestamp = entries.Last().Timestamp;
-        frontmatter.updated_at = now.ToString("s");
+        frontmatter.ReaderaTimestamp = entries.Last().Timestamp;
+        frontmatter.UpdatedAt = now.ToString("s");
 
         await storage.Put(mdFilePath, frontmatter.PrependYamlTag(mdoc.ToString()).ToStream());
         Log.Information("ReadEraImporter: saved {MarkdownDocument} document. Timestamp changed from {OldTimestamp} to {NewTimestamp}",
-            mdFilePath, timestamp, frontmatter.readera_timestamp);
+            mdFilePath, timestamp, frontmatter.ReaderaTimestamp);
     }
 
     private async Task ImportWord(

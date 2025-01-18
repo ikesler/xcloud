@@ -36,12 +36,14 @@ builder.Host.UseSerilog((ctx, loggerConfig) =>
 
     if (ctx.HostingEnvironment.IsProduction())
     {
-        var uri = ctx.Configuration.GetValue<string>("Logging:ntfy:url");
+        var uri = ctx.Configuration.GetValue<string>("Logging:ntfy:url")
+            ?? throw new Exception("Missing NTFY url.");
         var username = ctx.Configuration.GetValue<string>("Logging:ntfy:username");
         var password = ctx.Configuration.GetValue<string>("Logging:ntfy:password");
         var authenticationString = $"{username}:{password}";
         var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes(authenticationString));
-        var topic = ctx.Configuration.GetValue<string>("Logging:ntfy:topic");
+        var topic = ctx.Configuration.GetValue<string>("Logging:ntfy:topic")
+            ?? throw new Exception("Missing NTFY topic.");
 
         var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", auth);
@@ -70,7 +72,7 @@ var app = builder.Build();
 app.UseSerilogRequestLogging();
 app.UseExceptionHandler(errorApp =>
 {
-    errorApp.Run(async context =>
+    errorApp.Run(context =>
     {
         context.Response.StatusCode = 500;
         context.Response.ContentType = "text/plain";
@@ -82,6 +84,8 @@ app.UseExceptionHandler(errorApp =>
 
             throw exceptionHandlerFeature.Error;
         }
+
+        return Task.CompletedTask;
     });
 });
 

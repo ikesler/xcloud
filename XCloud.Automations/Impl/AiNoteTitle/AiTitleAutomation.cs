@@ -109,8 +109,8 @@ public class AiTitleAutomation(IStorage storage,
         var content = await storageItem.Content.ReadAllStringAsync();
         var (frontmatter, contentWithoutFrontmatter) = Frontmatter.Parse(content);
         var hasContent = !string.IsNullOrWhiteSpace(contentWithoutFrontmatter);
-        var processedBefore = frontmatter?.automation?.ContainsKey(Code) ?? false;
-        var hasTitle = !string.IsNullOrWhiteSpace(frontmatter?.title);
+        var processedBefore = frontmatter?.Automation?.ContainsKey(Code) ?? false;
+        var hasTitle = !string.IsNullOrWhiteSpace(frontmatter?.Title);
         if (!overrideTitle && (hasTitle || processedBefore)) return;
         if (!hasContent) return;
 
@@ -150,9 +150,9 @@ public class AiTitleAutomation(IStorage storage,
         }
 
         frontmatter ??= new Frontmatter();
-        frontmatter.title = completion.Value.Content[0].Text;
-        frontmatter.automation ??= new Dictionary<string, string>();
-        frontmatter.automation[Code] = (await storage.LocalTime()).ToString("s");
+        frontmatter.Title = completion.Value.Content[0].Text;
+        frontmatter.Automation ??= new Dictionary<string, string>();
+        frontmatter.Automation[Code] = (await storage.LocalTime()).ToString("s");
         content = frontmatter.PrependYamlTag(contentWithoutFrontmatter);
         await storage.Put(file.Key, content.ToStream());
     }

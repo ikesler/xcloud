@@ -1,32 +1,39 @@
 ﻿using System.Text.Encodings.Web;
 using Serilog;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable StringLiteralTypo
 
 namespace XCloud.Core.Metadata;
 
 public class Frontmatter
 {
     private const string TripleDash = "---";
-    private static IDeserializer YamlDeserializer = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
-    private static ISerializer YamlSerializer = new SerializerBuilder()
+    private static readonly IDeserializer YamlDeserializer = new DeserializerBuilder()
+        .IgnoreUnmatchedProperties()
+        .WithNamingConvention(UnderscoredNamingConvention.Instance)
+        .Build();
+    private static readonly ISerializer YamlSerializer = new SerializerBuilder()
+        .WithNamingConvention(UnderscoredNamingConvention.Instance)
         .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull | DefaultValuesHandling.OmitEmptyCollections)
         .Build();
 
-    public OgMetadata? og { get; set; }
-    public string? preview_image { get; set; }
-    public string? url { get; set; }
-    public string? title { get; set; }
-    public string? author { get; set; }
-    public ShareOptions? share { get; set; }
+    public OgMetadata? Og { get; set; }
+    public string? PreviewImage { get; set; }
+    public string? Url { get; set; }
+    public string? Title { get; set; }
+    public string? Author { get; set; }
+    public ShareOptions? Share { get; set; }
 
-    public string created_at { get; set; }
-    public string updated_at { get; set; }
+    public string? CreatedAt { get; init; }
+    public string? UpdatedAt { get; set; }
 
-    public long? readera_timestamp { get; set; }
-    public string? readera_uri { get; set; }
+    public long? ReaderaTimestamp { get; set; }
+    public string? ReaderaUri { get; set; }
 
-    public Dictionary<string, string>? automation { get; set; }
-    public object tags { get; set; }
+    public Dictionary<string, string>? Automation { get; set; }
+    public object? Tags { get; init; }
 
     public static (Frontmatter?, string) Parse(string note)
     {
@@ -75,17 +82,17 @@ public class Frontmatter
 
     public string ToOgMetaTags()
     {
-        if (og == null) return "";
+        if (Og == null) return "";
 
         var metaDic = new Dictionary<string, string?>
         {
-            ["og:type"] = og.type,
-            ["og:title"] = og.title,
-            ["og:url"] = og.url,
-            ["og:image"] = og.image?.url ?? preview_image,
-            ["og:image:width"] = og.image?.width?.ToString(),
-            ["og:image:height"] = og.image?.height?.ToString(),
-            ["og:description"] = og.description,
+            ["og:type"] = Og.type,
+            ["og:title"] = Og.title,
+            ["og:url"] = Og.url,
+            ["og:image"] = Og.image?.url ?? PreviewImage,
+            ["og:image:width"] = Og.image?.width?.ToString(),
+            ["og:image:height"] = Og.image?.height?.ToString(),
+            ["og:description"] = Og.description,
         };
 
         return string.Concat(metaDic.Keys.Where(k => metaDic[k] != null).Select(k =>

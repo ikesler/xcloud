@@ -149,11 +149,11 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
         var now = await storage.LocalTime();
         var frontmatter = new Frontmatter
         {
-            created_at = now.ToString("s"),
-            updated_at = now.ToString("s")
+            CreatedAt = now.ToString("s"),
+            UpdatedAt = now.ToString("s")
         };
-        frontmatter.url = ctx.ClipRequest.Url.ToString();
-        frontmatter.og = new OgMetadata
+        frontmatter.Url = ctx.ClipRequest.Url.ToString();
+        frontmatter.Og = new OgMetadata
         {
             image = ctx.OgMetaTags.ContainsKey("og:image")
                 ? new OgImageMetadata
@@ -169,8 +169,8 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
             url = ctx.OgMetaTags.GetValueOrDefault("og:url"),
             type = ctx.OgMetaTags.GetValueOrDefault("og:type"),
         };
-        frontmatter.preview_image = ctx.OgMetaTags.GetValueOrDefault("og:image");
-        frontmatter.title = ctx.OgMetaTags.GetValueOrDefault("og:title") ?? article.Title;
+        frontmatter.PreviewImage = ctx.OgMetaTags.GetValueOrDefault("og:image");
+        frontmatter.Title = ctx.OgMetaTags.GetValueOrDefault("og:title") ?? article.Title;
 
         return frontmatter;
     }

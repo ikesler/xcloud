@@ -2,5 +2,5 @@
 
 public class SecuritySettings
 {
-    public string JwtSignKey { get; set; }
+    public required string JwtSignKey { get; init; }
 }

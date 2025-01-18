@@ -12,8 +12,8 @@ public class Module: IModule
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
         var securitySettings = configuration
-            .GetSection(nameof(SecuritySettings))
-            .Get<SecuritySettings>();
+            .GetRequiredSection(nameof(SecuritySettings))
+            .Get<SecuritySettings>() ?? throw new Exception("Missing sequrity settings");
 
         services.AddAuthentication().AddJwtBearer(o =>
         {
@@ -36,8 +36,8 @@ public class Module: IModule
             options.RequestCultureProviders = [
                 new CustomRequestCultureProvider(context =>
                 {
-                    var userLangs = context.Request.Headers["Accept-Language"].ToString();
-                    var firstLang = userLangs.Split(',').FirstOrDefault();
+                    var languages = context.Request.Headers.AcceptLanguage.ToString();
+                    var firstLang = languages.Split(',').FirstOrDefault();
                     var defaultLang = string.IsNullOrEmpty(firstLang) ? "en" : firstLang;
                     var result = new ProviderCultureResult(defaultLang, defaultLang);
                     Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(defaultLang);
