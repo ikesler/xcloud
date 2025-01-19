@@ -132,6 +132,8 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
 
     private async Task<SharedFileInfo?> GetSharedFileInfo(string shareKey)
     {
+        if (!crypto.ValidateShareKey(shareKey)) return null;
+
         var sfi = await storage.GetJson<SharedFileInfo>(SharesDir / shareKey);
         if (sfi == null) return null;
         var fi = await storage.Stat(sfi.Path);

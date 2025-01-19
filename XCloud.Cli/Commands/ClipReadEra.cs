@@ -4,6 +4,7 @@ using CliFx.Infrastructure;
 using Microsoft.Extensions.Options;
 using Polly.Registry;
 using XCloud.Clipper.Api.Dto;
+using XCloud.Helpers;
 using XCloud.ReadEra.Constants;
 using XCloud.ReadEra.Impl;
 using XCloud.Storage.Impl;
@@ -28,7 +29,7 @@ public class ClipReadEra : ICommand
             new StorageDecorator(new LocalFsStorageProvider(Options.Create(new StorageSettings
             {
                 LocalFSRoot = @"D:\xhome",
-                ReadOnly = false,
+                ReadOnly = true,
             })))
         );
         await ebook.ImportFromReadEraBackup(File.OpenRead(Path));

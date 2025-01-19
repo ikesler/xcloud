@@ -109,6 +109,10 @@ public class ShareController(IShareService shareService) : Controller
         if (string.IsNullOrWhiteSpace(shareKey)) return BadRequest();
 
         var pathArray = shareKey.Split('/').ToArray();
+        if (pathArray.Any(seg => string.IsNullOrWhiteSpace(seg) || !seg.IsValidBase64Url()))
+        {
+            return BadRequest();
+        }
 
         if (type == ShareType.Raw)
         {

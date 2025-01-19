@@ -7,3 +7,4 @@ riderModule.iml
 docker-compose.yaml
 ./deploy.sh
 sonarlint
+code2prompt.txt

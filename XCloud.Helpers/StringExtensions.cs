@@ -87,10 +87,21 @@ public static class StringExtensions
 
     public static Stream ToStream(this string value)
     {
-        return new MemoryStream(Encoding.UTF8.GetBytes(value));
+        return new MemoryStream(value.ToBytes());
     }
 
     public static string Sha256(this string src) => BitConverter.ToString(
-        System.Security.Cryptography.SHA256.HashData(
-            Encoding.UTF8.GetBytes(src)));
+        System.Security.Cryptography.SHA256.HashData(src.ToBytes()));
+
+    public static byte[] ToBytes(this string src) => Encoding.UTF8.GetBytes(src);
+
+    public static string Base64(this string src) => Convert.ToBase64String(src.ToBytes());
+
+    public static string Base64Url(this string src) => System.Buffers.Text.Base64Url
+        .EncodeToString(src.ToBytes());
+
+    public static bool IsValidBase64Url(this string str) => str.All(ch => char.IsAsciiLetter(ch)
+        || char.IsAsciiDigit(ch)
+        || ch == '-'
+        || ch == '_');
 }
