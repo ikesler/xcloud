@@ -35,6 +35,9 @@ public class Frontmatter
     public Dictionary<string, string>? Automation { get; set; }
     public object? Tags { get; init; }
 
+    [YamlMember(Alias = "excalidraw-plugin")]
+    public string? ExcalidrawPlugin { get; set; }
+
     public static (Frontmatter?, string) Parse(string note)
     {
         try
