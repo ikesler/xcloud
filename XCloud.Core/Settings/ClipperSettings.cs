@@ -7,8 +7,8 @@ public class ClipperSettings
     public required string? TemplateDirectory { get; init; }
     public required string BookmarkBasePath { get; init; }
     public required string EpubBasePath { get; init; }
-    public required string? ResourcesBasePath { get; init; }
-    public required string? ResourcesRelativePath { get; init; }
+    public required string ResourcesBasePath { get; init; }
+    public required string ResourcesRelativePath { get; init; }
     public required string[] GlobalSelectorsToRemove { get; init; }
     public required Dictionary<string, string[]> DomainSelectorsToRemove { get; set; }
     public required Dictionary<string, string> DomainSelectorsToInclude { get; set; }

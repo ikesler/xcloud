@@ -13,7 +13,7 @@ public class Module: IModule
     {
         var securitySettings = configuration
             .GetRequiredSection(nameof(SecuritySettings))
-            .Get<SecuritySettings>() ?? throw new Exception("Missing sequrity settings");
+            .Get<SecuritySettings>() ?? throw new XCloudException("Missing sequrity settings");
 
         services.AddAuthentication().AddJwtBearer(o =>
         {

@@ -1,7 +1,6 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
-using MimeMapping;
 using QuickEPUB;
 using XCloud.Helpers;
 using ReverseMarkdown;
@@ -13,6 +12,9 @@ using XCloud.Common.Api;
 using XCloud.Core.Metadata;
 using XCloud.Core.Settings;
 using XCloud.Storage.Api;
+using static XCloud.Helpers.Paths;
+using static System.String;
+using static XCloud.Helpers.FileNameHelpers;
 
 namespace XCloud.Clipper.Impl;
 
@@ -22,7 +24,7 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
     {
         var ctx = await InitContext(clipRequest);
         var article = await GetArticle(ctx);
-        var (path, fileName) = await GetStoragePath(ctx.ClipperSettings.ClipBasePath, article.Title, ".md");
+        var (path, fileName) = await GetStoragePath(Path(ctx.ClipperSettings.ClipBasePath), article.Title, ".md");
 
         var converter = new Converter(new Config
         {
@@ -46,7 +48,7 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
     {
         var ctx = await InitContext(clipRequest);
         var article = await GetArticle(ctx);
-        var (path, fileName) = await GetStoragePath(ctx.ClipperSettings.BookmarkBasePath, article.Title, ".md");
+        var (path, fileName) = await GetStoragePath(Path(ctx.ClipperSettings.BookmarkBasePath), article.Title, ".md");
 
         var mdown = await templater.Render(ctx.ClipperSettings.TemplateDirectory,
             "xcloud_bookmark.liquid",
@@ -67,7 +69,7 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
     {
         var ctx = await InitContext(clipRequest);
         var article = await GetArticle(ctx);
-        var (path, _) = await GetStoragePath(ctx.ClipperSettings.EpubBasePath, article.Title, ".epub");
+        var (path, _) = await GetStoragePath(Path(ctx.ClipperSettings.EpubBasePath), article.Title, ".epub");
         
         var doc = new Epub(article.Title, article.Author ?? "Unknown Author");
         var infoSection = await templater.Render(ctx.ClipperSettings.TemplateDirectory,
@@ -113,7 +115,7 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
         return ctx;
     }
 
-    private async Task<Article> GetArticle(ClipContext ctx)
+    private static async Task<Article> GetArticle(ClipContext ctx)
     {
         var reader = new SmartReader.Reader(ctx.ClipRequest.Url.ToString(),
             await ctx.HttpClient.GetStreamAsync(ctx.ClipRequest.Url));
@@ -121,27 +123,20 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
         return await reader.GetArticleAsync();
     }
 
-    private async Task<(string path, string fileName)> GetStoragePath(string basePath, string? title, string extension)
+    private async Task<(string path, string fileName)> GetStoragePath(SlashString basePath, string? title, string extension)
     {
-        var fileName = string.IsNullOrWhiteSpace(title)
-            ? Guid.NewGuid().ToString()
-            : title;
+        var fileName = (IsNullOrWhiteSpace(title) ? Guid.NewGuid().ToString() : title).EscapeFileName();
 
-        fileName = fileName.EscapeFileName();
-
-        string path = null!;
-        for (var i = 0; i < 50; ++i)
+        string nameWithExtension;
+        string fullPath;
+        var suffixGen = new FileNameSuffixGenerator();
+        do
         {
-            var suffix = i == 0 ? "" : $"_{i}";
-            path = $"{basePath ?? "clip"}/{fileName}{suffix}{extension}";
-            if (!await storage.Exists(path))
-            {
-                fileName += suffix;
-                break;
-            }
-        }
+            nameWithExtension = $"{fileName}{suffixGen.Next()}{extension}";
+            fullPath = basePath / nameWithExtension;
+        } while (await storage.Exists(fullPath));
 
-        return (path, fileName);
+        return (fullPath, nameWithExtension);
     }
 
     private async Task<Frontmatter> GetFrontmatter(ClipContext ctx, Article article)
@@ -175,7 +170,7 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
         return frontmatter;
     }
 
-    private void PreProcess(IElement e, ClipperSettings settings, string host, ClipContext ctx)
+    private static void PreProcess(IElement e, ClipperSettings settings, string host, ClipContext ctx)
     {
         host = host.ToLowerInvariant();
         if (host.StartsWith("www.")) host = host.Replace("www.", "");
@@ -212,7 +207,7 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
         var imageLinks = e.QuerySelectorAll("a[href$='.jpg']");
         foreach (var imageLink in imageLinks)
         {
-            if (imageLink.Children.Length == 1 && imageLink.Children.Single().TagName.ToLowerInvariant() == "img")
+            if (imageLink.Children.Length == 1 && imageLink.Children.Single().TagName.Equals("img", StringComparison.InvariantCultureIgnoreCase))
             {
                 // Obsidian fails to render markdown if an image has an indentation
                 // This way we remove indentation in HTML and in consequent markdown
@@ -254,28 +249,21 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
         }
         catch (Exception e)
         {
-            Log.Warning(e, $"An error occured while downloading resource {uriStr}: {e.Message}");
-            throw;
+            Log.Warning(e, "An error occured while downloading resource {ResourceUrl}: {ErrorMessage}", uriStr, e.Message);
+            return null;
         }
     }
 
     private async Task<string?> SaveResourceUnsafe(string fileName, string? uriStr, ClipContext ctx)
     {
-        if (!Uri.TryCreate(uriStr, UriKind.Absolute, out var uri)) return null;
-        var baseImagePath = Path.GetFileNameWithoutExtension(fileName).Replace(" ", "");
+        if (!Uri.TryCreate(uriStr, UriKind.Absolute, out _)) return null;
 
         var imageResponseMsg = await ctx.HttpClient.GetAsync(uriStr);
-        var contentType = imageResponseMsg.Content.Headers.ContentType?.MediaType;
-        var extension = contentType == null
-            ? null
-            : MimeUtility.GetExtensions(contentType)?.FirstOrDefault();
-        extension = extension == null
-            ? Path.GetExtension(uri.AbsolutePath)
-            : $".{extension}";
 
+        var extension = MimeExtension(imageResponseMsg.Content.Headers.ContentType?.MediaType);
+        var imagePath = Path(fileName).FileNameWithoutExtension / Guid.NewGuid() + extension;
         var imageStream = await imageResponseMsg.Content.ReadAsStreamAsync();
-        var imagePath = $"{baseImagePath}/{Guid.NewGuid()}{extension}";
-        await storage.Put($"{ctx.ClipperSettings.ResourcesBasePath}/{imagePath}", imageStream);
-        return $"{ctx.ClipperSettings.ResourcesRelativePath}/{imagePath}";
+        await storage.Put(Path(ctx.ClipperSettings.ResourcesBasePath) / imagePath, imageStream);
+        return Path(ctx.ClipperSettings.ResourcesRelativePath) / imagePath;
     }
 }

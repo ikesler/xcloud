@@ -1,5 +1,6 @@
 ﻿using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.Globalization;
 using Microsoft.Extensions.Options;
 using OpenAI;
 using OpenAI.Chat;
@@ -52,7 +53,7 @@ public class AiTitleAutomation(IStorage storage,
         if (lockHandle == null) return;
         await using (lockHandle)
         {
-            if (fillGaps || !DateTime.TryParse(await storage.KvGet(lastRunKey), out var lastRunDate))
+            if (fillGaps || !DateTime.TryParse(await storage.KvGet(lastRunKey), CultureInfo.InvariantCulture, out var lastRunDate))
             {
                 lastRunDate = DateTime.MinValue;
             }

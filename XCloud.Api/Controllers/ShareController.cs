@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using XCloud.Api.Models;
+using XCloud.Core;
 using XCloud.Helpers;
 using XCloud.Sharing.Api;
 using XCloud.Sharing.Api.Dto;
@@ -132,7 +133,7 @@ public class ShareController(IShareService shareService) : Controller
             ExcalidrawShare excalidrawShare => View("ExcalidrawShare", excalidrawShare),
             VideoShare videoShare => View("VideoShare", videoShare),
             RawShare rawShare => File(rawShare.Content, rawShare.ContentType),
-            _ => throw new Exception($"Unsupported share type: {share.GetType()}"),
+            _ => throw new XCloudException($"Unsupported share type: {share.GetType()}"),
         };
     }
 

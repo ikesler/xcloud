@@ -37,13 +37,13 @@ builder.Host.UseSerilog((ctx, loggerConfig) =>
     if (ctx.HostingEnvironment.IsProduction())
     {
         var uri = ctx.Configuration.GetValue<string>("Logging:ntfy:url")
-            ?? throw new Exception("Missing NTFY url.");
+            ?? throw new XCloudException("Missing NTFY url.");
         var username = ctx.Configuration.GetValue<string>("Logging:ntfy:username");
         var password = ctx.Configuration.GetValue<string>("Logging:ntfy:password");
         var authenticationString = $"{username}:{password}";
         var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes(authenticationString));
         var topic = ctx.Configuration.GetValue<string>("Logging:ntfy:topic")
-            ?? throw new Exception("Missing NTFY topic.");
+            ?? throw new XCloudException("Missing NTFY topic.");
 
         var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", auth);
@@ -102,4 +102,4 @@ app.UseStaticFiles();
 
 Log.Information("Starting application");
 
-app.Run();
+await app.RunAsync();

@@ -75,7 +75,7 @@ public class LocalFsStorageProvider(IOptions<StorageSettings> storageSettings) :
         return Task.FromResult(File.Exists(path));
     }
 
-    public Task<StorageItem?> Get(string key, long firstByte, long? lastByte)
+    public Task<StorageItem?> Get(string key, long firstByte = 0, long? lastByte = null)
     {
         var path = Path.Combine(_storageSettings.LocalFSRoot, key);
         var fileName = Path.GetFileName(path);

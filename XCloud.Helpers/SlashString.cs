@@ -14,6 +14,11 @@ public readonly struct SlashString(string path)
         return new SlashString($"{left}/{right.Trim('/')}");
     }
 
+    public static SlashString operator /(SlashString left, Guid right)
+    {
+        return new SlashString($"{left}/{right}");
+    }
+
     public static implicit operator string(SlashString slashString)
     {
         return slashString._path;

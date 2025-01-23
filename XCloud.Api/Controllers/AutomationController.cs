@@ -8,7 +8,7 @@ namespace XCloud.Api.Controllers;
 [Route("automation")]
 [Authorize]
 [ApiController]
-public class AutomationController(IAutomationManager automationManager) : Controller
+public class AutomationController(IAutomationManager automationManager) : ControllerBase
 {
     [HttpPost]
     [Route("{automation}")]

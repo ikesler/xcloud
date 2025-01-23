@@ -24,7 +24,7 @@ public class Crypto(IOptions<ShareSettings> shareSettings)
         );
     }
 
-    public bool ValidateShareKey(string? shareKey)
+    public static bool ValidateShareKey(string? shareKey)
     {
         return !string.IsNullOrWhiteSpace(shareKey)
             && shareKey.IsValidBase64Url()

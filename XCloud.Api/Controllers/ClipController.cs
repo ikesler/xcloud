@@ -9,7 +9,7 @@ namespace XCloud.Api.Controllers;
 [Route("clip")]
 [Authorize]
 [ApiController]
-public class ClipController(IClipper clipper, EBookNotesImporter ebook) : Controller
+public class ClipController(IClipper clipper, EBookNotesImporter ebook) : ControllerBase
 {
     [HttpPost]
     [Route("article")]

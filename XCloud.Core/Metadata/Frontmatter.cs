@@ -46,8 +46,7 @@ public class Frontmatter
         }
         catch (Exception e)
         {
-            Log.Error(e, "An error occurred during parsing note metadata");
-            throw;
+            throw new XCloudException("An error occurred during parsing note metadata", e);
         }
     }
 

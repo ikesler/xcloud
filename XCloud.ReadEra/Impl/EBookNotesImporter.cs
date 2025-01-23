@@ -6,6 +6,7 @@ using Polly;
 using Polly.Registry;
 using Scriban;
 using Serilog;
+using XCloud.Core;
 using XCloud.Core.Metadata;
 using XCloud.Core.Settings;
 using XCloud.Helpers;
@@ -161,7 +162,7 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
             }
         }
 
-        frontmatter.ReaderaTimestamp = entries.Last().Timestamp;
+        frontmatter.ReaderaTimestamp = frontmatter.ReaderaTimestamp = entries[^1].Timestamp;
         frontmatter.UpdatedAt = now.ToString("s");
 
         await storage.Put(mdFilePath, frontmatter.PrependYamlTag(mdoc.ToString()).ToStream());
@@ -252,7 +253,7 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
         var entry = archive.GetEntry("library.json");
         if (entry == null)
         {
-            throw new Exception($"ReadEra backup file is invalid");
+            throw new XCloudException("ReadEra backup file is invalid");
         }
 
         var result = await JsonSerializer.DeserializeAsync<ReadEraLibrary>(
@@ -260,7 +261,7 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
             _jsonOptions);
         if (result == null)
         {
-            throw new Exception($"ReadEra backup json is invalid");
+            throw new XCloudException("ReadEra backup json is invalid");
         }
 
         return result;

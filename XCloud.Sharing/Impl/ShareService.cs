@@ -3,6 +3,7 @@ using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using Microsoft.Extensions.Options;
 using Serilog;
+using XCloud.Core;
 using XCloud.Core.Metadata;
 using XCloud.Helpers;
 using XCloud.Sharing.Api;
@@ -56,16 +57,16 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
         var settings = await storage.LoadSettings();
 
         key = key.Trim();
-        // obsidian://open?vault=memo&file=%E2%98%95%EF%B8%8F%20code%2FEnvsubst"
+        // obsidian://open?vault=memo&file=path
         if (key.StartsWith("obsidian://"))
         {
             var obsidianUrl = new Uri(key);
             var queryDictionary = ParseQuery(obsidianUrl.Query);
             var vault = queryDictionary["vault"].ToString();
             if (IsNullOrWhiteSpace(vault))
-                throw new Exception("Vault not specified");
+                throw new XCloudException("Vault not specified");
             if (!settings.Sharing.ObsidianVaults.TryGetValue(vault, out var vaultPath))
-                throw new Exception($"Vault not found: {vault}");
+                throw new XCloudException($"Vault not found: {vault}");
 
             key = $"{vaultPath}/{queryDictionary["file"]}.md";
             Log.Information("Parsed Obsidian URL as object key {Key}", key);
@@ -79,7 +80,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
     private async Task<SharedFileInfo> CreateSharedFileInfo(string path, bool? share = null)
     {
         var storageItem = await storage.Get(path);
-        if (storageItem == null) throw new Exception($"Path does not exist: {path}");
+        if (storageItem == null) throw new XCloudException($"Path does not exist: {path}");
         var (frontmatter, bodyWithoutMeta) = Frontmatter.Parse(await storageItem.Content.ReadAllStringAsync());
         if (share != null)
         {
@@ -112,7 +113,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
 
         // To get updated timestamp
         var storageMetaItem = await storage.Stat(path)
-            ?? throw new Exception("WTF ???");
+            ?? throw new XCloudException($"Could not stat the path: {path}");
 
         return new SharedFileInfo(
             path,
@@ -132,7 +133,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
 
     private async Task<SharedFileInfo?> GetSharedFileInfo(string shareKey)
     {
-        if (!crypto.ValidateShareKey(shareKey)) return null;
+        if (!Crypto.ValidateShareKey(shareKey)) return null;
 
         var sfi = await storage.GetJson<SharedFileInfo>(SharesDir / shareKey);
         if (sfi == null) return null;
@@ -171,10 +172,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
             else
             {
                 if (!parent.Shared) return new();
-                if (!parent.Index)
-                {
-                    if (autoLinks.All(d => !sfi.Path.StartsWith(d))) return new();
-                }
+                if (!parent.Index && autoLinks.All(d => !sfi.Path.StartsWith(d))) return new();
             }
 
             navRoot = parent;
@@ -268,7 +266,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
         if (sfi != null)
         {
             var storageItem = await storage.Get(sfi.Path)
-                ?? throw new Exception($"Path does not exist: {sfi.Path}");
+                ?? throw new XCloudException($"Path does not exist: {sfi.Path}");
             var (frontmatter, bodyWithoutMeta) = Frontmatter.Parse(await storageItem.Content.ReadAllStringAsync());
             if (frontmatter != null)
             {
@@ -296,7 +294,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
 
     public async Task<string?> GetShareAccessToken(string[] shareKeyPath, string passkey)
     {
-        var sfi = await GetSharedFileInfo(shareKeyPath.Last());
+        var sfi = await GetSharedFileInfo(shareKeyPath[^1]);
         if (sfi == null) return null;
 
         var token = crypto.GetShareAccessToken(sfi.ShareKey, passkey);

@@ -1,4 +1,5 @@
 ﻿using XCloud.Automations.Api;
+using XCloud.Core;
 using XCloud.Ext.Automation;
 using XCloud.Storage.Api;
 
@@ -13,7 +14,7 @@ public class AutomationManager(IStorage storage, IEnumerable<IAutomation> automa
         foreach (var automationSettings in settings.Automations)
         {
             var automation = automations.FirstOrDefault(x => x.Code == automationSettings.Type);
-            if (automation == null) throw new Exception($"Could not find automation: {automationSettings.Type}");
+            if (automation == null) throw new XCloudException($"Could not find automation: {automationSettings.Type}");
             await automation.Run(automationSettings.Params);
         }
     }
@@ -30,7 +31,7 @@ public class AutomationManager(IStorage storage, IEnumerable<IAutomation> automa
     public async Task Run(string code, Dictionary<string, string> args)
     {
         var automation = automations.FirstOrDefault(x => x.Code == code);
-        if (automation == null) throw new Exception($"Could not find automation: {code}");
+        if (automation == null) throw new XCloudException($"Could not find automation: {code}");
         await automation.Run(args);
     }
 }

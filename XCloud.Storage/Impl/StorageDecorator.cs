@@ -1,6 +1,7 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using Serilog;
+using XCloud.Core;
 using XCloud.Core.Settings;
 using XCloud.Ext.Storage;
 using XCloud.Helpers;
@@ -48,7 +49,7 @@ public class StorageDecorator(IStorageProvider provider): IStorage
         if (_cache.TryGetValue("Settings", out var settings)) return (XCloudSettings) settings;
 
         var newSettingsFile = await Get(SettingsFile)
-            ?? throw new Exception("Could not load new settings file from storage");
+            ?? throw new XCloudException("Could not load new settings file from storage");
 
         settings = YamlDeserializer
             .Deserialize<XCloudSettings>(await newSettingsFile.Content.ReadAllStringAsync());
@@ -76,7 +77,7 @@ public class StorageDecorator(IStorageProvider provider): IStorage
     {
         var item = await Get(key);
         if (item == null) return default;
-        var result = JsonSerializer.Deserialize<T>(item.Content, JsonSerializerOptions);
+        var result = await JsonSerializer.DeserializeAsync<T>(item.Content, JsonSerializerOptions);
         await item.Content.DisposeAsync();
         return result;
     }
@@ -132,7 +133,7 @@ public class StorageDecorator(IStorageProvider provider): IStorage
         if (lockItem != null)
         {
             return JsonSerializer.Deserialize<LockToken>(await lockItem.Content.ReadAllStringAsync())
-                ?? throw new Exception("Could not deserialize lock token");
+                ?? throw new XCloudException("Could not deserialize lock token");
         }
 
         return null;
@@ -148,7 +149,7 @@ public class StorageDecorator(IStorageProvider provider): IStorage
         return new LockHandle(async span =>
         {
             var actualToken = await GetLock(key);
-            if (actualToken != token) throw new Exception("Lock has been lost");
+            if (actualToken != token) throw new XCloudException("Lock has been lost");
             token = actualToken with
             {
                 ExpiresAt = DateTime.UtcNow + span
@@ -157,7 +158,7 @@ public class StorageDecorator(IStorageProvider provider): IStorage
         }, async () =>
         {
             var actualToken = await GetLock(key);
-            if (actualToken != token) throw new Exception("Lock has been lost");
+            if (actualToken != token) throw new XCloudException("Lock has been lost");
             await Rm(lockPath);
         });
     }

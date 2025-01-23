@@ -1,8 +1,8 @@
 ﻿/**
  * Sets up Justified Gallery.
  */
-if (!!$.prototype.justifiedGallery) {
-    var options = {
+if ($.prototype.justifiedGallery) {
+    let options = {
         rowHeight: 140,
         margins: 4,
         lastRow: "justify"
@@ -25,9 +25,9 @@ $(document).ready(function() {
      * for Desktop, tablet and mobile.
      */
     if ($(".post").length) {
-        var menu = $("#menu");
-        var nav = $("#menu > #nav");
-        var menuIcon = $("#menu-icon, #menu-icon-tablet");
+        let menu = $("#menu");
+        let nav = $("#menu > #nav");
+        let menuIcon = $("#menu-icon, #menu-icon-tablet");
 
         /**
          * Display the menu on hi-res laptops and desktops.
@@ -56,7 +56,7 @@ $(document).ready(function() {
          */
         if (menu.length) {
             $(window).on("scroll", function() {
-                var topDistance = menu.offset().top;
+                let topDistance = menu.offset().top;
 
                 // hide only the navigation links on desktop
                 if (!nav.is(":visible") && topDistance < 50) {
@@ -82,9 +82,9 @@ $(document).ready(function() {
          * hide it again after scrolling downwards.
          */
         if ($( "#footer-post").length) {
-            var lastScrollTop = 0;
+            let lastScrollTop = 0;
             $(window).on("scroll", function() {
-                var topDistance = $(window).scrollTop();
+                let topDistance = $(window).scrollTop();
 
                 if (topDistance > lastScrollTop){
                     // downscroll -> show menu

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SonarLintProjectSettings">
+    <option name="additionalProperties">
+      <map>
+        <entry key="sonar.issue.ignore.multicriteria" value="e1,e2,e3,e4" />
+        <entry key="sonar.issue.ignore.multicriteria.e1.resourceKey" value="**" />
+        <entry key="sonar.issue.ignore.multicriteria.e1.ruleKey" value="csharpsquid:S6967" />
+        <entry key="sonar.issue.ignore.multicriteria.e2.resourceKey" value="**/ClipController.cs" />
+        <entry key="sonar.issue.ignore.multicriteria.e2.ruleKey" value="csharpsquid:S6960" />
+        <entry key="sonar.issue.ignore.multicriteria.e3.resourceKey" value="**" />
+        <entry key="sonar.issue.ignore.multicriteria.e3.ruleKey" value="Web:S6844" />
+        <entry key="sonar.issue.ignore.multicriteria.e4.resourceKey" value="**" />
+        <entry key="sonar.issue.ignore.multicriteria.e4.ruleKey" value="Web:S4084" />
+      </map>
+    </option>
+    <option name="fileExclusions">
+      <list>
+        <option value="FILE:XCloud.Api/wwwroot/main.js" />
+      </list>
+    </option>
+  </component>
+</project>
