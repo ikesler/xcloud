@@ -38,6 +38,13 @@
                     </div>
                     <button type="submit" onclick="document.getElementById('errorMessage')?.remove()">@Localizer["Send"]</button>
                 </div>
+                @if (Model.Hint != null)
+                {
+                    <div style="display: flex; flex-direction: row; gap: 16px; align-items: start;">
+                        <div>@Localizer["PasskeyHint"]</div>
+                        <div class="info-text">@Model.Hint</div>
+                    </div>
+                }
             </form>
         </div>
     </article>

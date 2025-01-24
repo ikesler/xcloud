@@ -19,3 +19,8 @@
 .li-nested::before {
    display: none
 }
+
+.info-text {
+  color: #2bbc8a;
+  font-style: italic;
+}

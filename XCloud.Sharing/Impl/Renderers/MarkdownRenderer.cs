@@ -25,15 +25,15 @@ public class MarkdownRenderer(Crypto crypto, IOptions<ShareSettings> shareSettin
         // This is an expected behavior in case of clipped documents
         // Only if original is not available or the clipped version is significantly modified,
         // it makes sense to explicitly opt in to the clipped version
-        if ((frontmatter?.Share?.redirect ?? true) && !IsNullOrWhiteSpace(frontmatter?.Url))
+        if ((frontmatter?.Share?.Redirect ?? true) && !IsNullOrWhiteSpace(frontmatter?.Url))
         {
             return new RedirectShare { Key = shareKey, Path = path, Url = frontmatter.Url };
         }
-        if (!IsNullOrWhiteSpace(frontmatter?.Share?.passkey) && (
+        if (!IsNullOrWhiteSpace(frontmatter?.Share?.Passkey) && (
                 IsNullOrWhiteSpace(accessKey) ||
-                !crypto.ValidateShareAccessToken(shareKey, frontmatter.Share.passkey, accessKey)
+                !crypto.ValidateShareAccessToken(shareKey, frontmatter.Share.Passkey, accessKey)
             )) {
-            return new RequestPasskeyShare();
+            return new RequestPasskeyShare { Hint = frontmatter.Share.PasskeyHint };
         }
 
         var mdoc = Markdown.Parse(bodyWithoutMeta);
@@ -53,7 +53,7 @@ public class MarkdownRenderer(Crypto crypto, IOptions<ShareSettings> shareSettin
         {
             Path = path,
             Key = shareKey,
-            Title = frontmatter?.Share?.title ?? frontmatter?.Title ?? Path(path).FileNameWithoutExtension,
+            Title = frontmatter?.Share?.Title ?? frontmatter?.Title ?? Path(path).FileNameWithoutExtension,
             Body = mdoc.ToHtml(markdigPipeline),
             OgMeta = frontmatter?.ToOgMetaTags(),
         };

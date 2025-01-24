@@ -129,7 +129,7 @@ public class ShareController(IShareService shareService) : Controller
             null => NotFound(),
             RedirectShare redirectShare => Redirect(redirectShare.Url),
             MarkdownShare markdownShare => View("MarkdownShare", markdownShare),
-            RequestPasskeyShare => View("RequestPasskeyShare", new PasskeyViewModel(false)),
+            RequestPasskeyShare passkeyShare => View("RequestPasskeyShare", new PasskeyViewModel(false, passkeyShare.Hint)),
             ExcalidrawShare excalidrawShare => View("ExcalidrawShare", excalidrawShare),
             VideoShare videoShare => View("VideoShare", videoShare),
             RawShare rawShare => File(rawShare.Content, rawShare.ContentType),
@@ -147,12 +147,12 @@ public class ShareController(IShareService shareService) : Controller
         if (pathArray.Length == 0) return BadRequest();
 
         var token = await shareService.GetShareAccessToken(pathArray, passkeyModel.Passkey);
-        if (token == null)
+        if (token.Token == null)
         {
-            return View("RequestPasskeyShare", new PasskeyViewModel(true));
+            return View("RequestPasskeyShare", new PasskeyViewModel(true, token.PasskeyHint));
         }
 
-        Response.Cookies.Append(PasskeyCookie, token, new CookieOptions
+        Response.Cookies.Append(PasskeyCookie, token.Token, new CookieOptions
         {
             Path = $"/s/{shareKey}",
             HttpOnly = true,
@@ -160,7 +160,7 @@ public class ShareController(IShareService shareService) : Controller
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.Now.AddDays(1),
         });
-        var share = await shareService.GetShare(pathArray, 0, null, null, token);
+        var share = await shareService.GetShare(pathArray, 0, null, null, token.Token);
         if (share is not MarkdownShare markdownShare) return NotFound();
         return View("MarkdownShare", markdownShare);
     }

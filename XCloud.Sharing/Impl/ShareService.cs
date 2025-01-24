@@ -7,6 +7,7 @@ using XCloud.Core;
 using XCloud.Core.Metadata;
 using XCloud.Helpers;
 using XCloud.Sharing.Api;
+using XCloud.Sharing.Api.Dto;
 using XCloud.Sharing.Api.Dto.Shares;
 using XCloud.Sharing.Impl.Renderers;
 using XCloud.Sharing.Settings;
@@ -86,7 +87,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
         {
             frontmatter ??= new Frontmatter();
             frontmatter.Share ??= new();
-            frontmatter.Share.shared = share.Value;
+            frontmatter.Share.Shared = share.Value;
             var mdown = frontmatter.PrependYamlTag(bodyWithoutMeta);
             await storage.Put(path, mdown.ToStream());
         }
@@ -106,10 +107,10 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
                     title);
             }).ToArray();
         var shareKey = crypto.GetShareKey(path);
-        var accessKey = IsNullOrWhiteSpace(frontmatter?.Share?.passkey)
+        var accessKey = IsNullOrWhiteSpace(frontmatter?.Share?.Passkey)
             ? null
-            : crypto.GetShareAccessToken(shareKey, frontmatter.Share.passkey);
-        var shared = frontmatter?.Share?.shared ?? false;
+            : crypto.GetShareAccessToken(shareKey, frontmatter.Share.Passkey);
+        var shared = frontmatter?.Share?.Shared ?? false;
 
         // To get updated timestamp
         var storageMetaItem = await storage.Stat(path)
@@ -121,9 +122,10 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
             linkedShareKeys,
             accessKey,
             shared,
-            frontmatter?.Share?.index ?? false,
+            frontmatter?.Share?.Index ?? false,
             frontmatter?.Title ?? Path(path).FileNameWithoutExtension,
-            storageMetaItem.Checksum());
+            storageMetaItem.Checksum(),
+            frontmatter?.Share?.PasskeyHint);
     }
 
     private async Task DeleteSharedFileInfo(string shareKey)
@@ -204,7 +206,11 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
                 return new RedirectShare { Url = Path(_shareSettings.BasePublicUrl) / ev.BlockedBy.ShareKey };
             }
 
-            return new RequestPasskeyShare { Key = ev.BlockedBy.ShareKey };
+            return new RequestPasskeyShare
+            {
+                Key = ev.BlockedBy.ShareKey,
+                Hint = ev.BlockedBy.PasskeyHint,
+            };
         }
 
         var path = ev.File.Path;
@@ -292,12 +298,12 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
         await DeleteSharedFileInfo(sfi.ShareKey);
     }
 
-    public async Task<string?> GetShareAccessToken(string[] shareKeyPath, string passkey)
+    public async Task<ShareAccessToken> GetShareAccessToken(string[] shareKeyPath, string passkey)
     {
         var sfi = await GetSharedFileInfo(shareKeyPath[^1]);
-        if (sfi == null) return null;
+        if (sfi == null) return new ShareAccessToken(null, null);
 
         var token = crypto.GetShareAccessToken(sfi.ShareKey, passkey);
-        return sfi.AccessKey != token ? null : token;
+        return sfi.AccessKey != token ? new ShareAccessToken(null, sfi.PasskeyHint) : new ShareAccessToken(token, sfi.PasskeyHint);
     }
 }

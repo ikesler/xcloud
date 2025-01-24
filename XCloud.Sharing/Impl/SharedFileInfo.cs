@@ -8,6 +8,7 @@ public record SharedFileInfo(
     bool Shared,
     bool Index,
     string? Title,
-    string Checksum);
+    string Checksum,
+    string? PasskeyHint);
 
 public record LinkedFileInfo(string ShareKey, string Path, string? Title);

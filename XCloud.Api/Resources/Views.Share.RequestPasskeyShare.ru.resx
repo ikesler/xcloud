@@ -137,4 +137,8 @@
     <value>Защищённая Страница</value>
     <comment>Passkey-protected Share</comment>
   </data>
+  <data name="PasskeyHint" xml:space="preserve">
+    <value>Подсказка</value>
+    <comment>Подсказка</comment>
+  </data>
 </root>

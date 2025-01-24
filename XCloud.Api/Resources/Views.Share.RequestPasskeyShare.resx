@@ -137,4 +137,8 @@
     <value>Passkey-protected Share</value>
     <comment>Passkey-protected Share</comment>
   </data>
+  <data name="PasskeyHint" xml:space="preserve">
+    <value>Hint</value>
+    <comment>Hint</comment>
+  </data>
 </root>
