@@ -10,9 +10,11 @@ public class ShareOptions
     public string? Passkey { get; set; }
     public string? PasskeyHint { get; set; }
     public bool Shared { get; set; }
-    
+
     /// <summary>
     /// Child shares should show navigation between siblings in the parent.
     /// </summary>
     public bool Index { get; set; }
+
+    public DateTime? ExpiresAt { get; set; }
 }

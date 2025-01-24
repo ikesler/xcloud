@@ -125,7 +125,8 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
             frontmatter?.Share?.Index ?? false,
             frontmatter?.Title ?? Path(path).FileNameWithoutExtension,
             storageMetaItem.Checksum(),
-            frontmatter?.Share?.PasskeyHint);
+            frontmatter?.Share?.PasskeyHint,
+            frontmatter?.Share?.ExpiresAt);
     }
 
     private async Task DeleteSharedFileInfo(string shareKey)
@@ -157,6 +158,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
     {
         if (shareKeyPath.Length == 0) return new();
         var settings = await storage.LoadSettings();
+        var localTime = await storage.LocalTime();
         var autoLinks = settings.Sharing.AutoSharedWhenLinked;
 
         SharedFileInfo? parent = null;
@@ -168,7 +170,7 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
 
             if (parent == null)
             {
-                if (!sfi.Shared) return new();
+                if (!sfi.Shared || (sfi.ExpiresAt != null && sfi.ExpiresAt < localTime)) return new();
                 if (sfi.AccessKey != null && sfi.AccessKey != accessKey) return new (null, sfi);
             }
             else

@@ -9,6 +9,7 @@ public record SharedFileInfo(
     bool Index,
     string? Title,
     string Checksum,
-    string? PasskeyHint);
+    string? PasskeyHint,
+    DateTime? ExpiresAt);
 
 public record LinkedFileInfo(string ShareKey, string Path, string? Title);
