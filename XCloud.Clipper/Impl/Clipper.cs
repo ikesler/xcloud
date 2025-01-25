@@ -125,7 +125,7 @@ public class Clipper(IStorage storage, ITemplater templater) : IClipper
 
     private async Task<(string path, string fileName)> GetStoragePath(SlashString basePath, string? title, string extension)
     {
-        var fileName = (IsNullOrWhiteSpace(title) ? Guid.NewGuid().ToString() : title).EscapeFileName();
+        var fileName = (IsNullOrWhiteSpace(title) ? Guid.NewGuid().ToString() : title).CreateFileName();
 
         string nameWithExtension;
         string fullPath;

@@ -4,13 +4,16 @@ namespace XCloud.Helpers;
 
 public static class StringExtensions
 {
+    private const int MaxFileNameLength = 100;
+
     private static readonly char[] InvalidPathCharacters = Path
         .GetInvalidFileNameChars()
         .Union(['?', '\\', '/', ':', ';', '*', '"', '<', '>', '|', '\''])
         .ToArray();
 
-    public static string EscapeFileName(this string source)
+    public static string CreateFileName(this string source)
     {
+        source = source.Length > MaxFileNameLength ? source[..MaxFileNameLength] : source;
         var fileName = new StringBuilder(source);
         for (var i = 0; i < fileName.Length; ++i)
         {
@@ -26,7 +29,7 @@ public static class StringExtensions
             .Replace("_ ", " ")
             .Replace("  ", " ")
             .ToString()
-            .Trim(' ', '_');
+            .Trim(' ', '_', '.');
     }
 
     public static double? ToNullDouble(this string? src) => double.TryParse(src, out var result) ? result : null;

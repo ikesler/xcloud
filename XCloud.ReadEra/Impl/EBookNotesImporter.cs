@@ -111,7 +111,7 @@ public class EBookNotesImporter(ResiliencePipelineProvider<string> pollyProvider
         var now = await storage.LocalTime();
         var docTitle = string.IsNullOrWhiteSpace(doc.Data.DocTitle) ? doc.Data.DocFileNameTitle : doc.Data.DocTitle;
         Log.Information("ReadEraImporter: processing document {Title}", docTitle);
-        var mdFilePath = Path(settings.ReadEra.NotesDirectory) / docTitle.EscapeFileName() + ".md";
+        var mdFilePath = Path(settings.ReadEra.NotesDirectory) / docTitle.CreateFileName() + ".md";
 
         var storageItem = await storage.Get(mdFilePath);
         var (parsedFrontmatter, bodyWithoutMeta) = storageItem == null
