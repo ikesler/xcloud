@@ -82,6 +82,21 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
     {
         var storageItem = await storage.Get(path);
         if (storageItem == null) throw new XCloudException($"Path does not exist: {path}");
+        if (!IsMarkdown(storageItem.FileName))
+        {
+            return new SharedFileInfo(
+                path,
+                crypto.GetShareKey(path),
+                [],
+                null,
+                share ?? false,
+                false,
+                Path(path).FileNameWithoutExtension,
+                storageItem.Checksum(),
+                null,
+                null);
+        }
+
         var (frontmatter, bodyWithoutMeta) = Frontmatter.Parse(await storageItem.Content.ReadAllStringAsync());
         if (share != null)
         {
