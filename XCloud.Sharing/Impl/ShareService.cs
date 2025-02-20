@@ -238,6 +238,25 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
         var storageItem = await storage.Get(path, firstByte, lastByte);
         if (storageItem == null) return null;
 
+        // should go before markdown
+        if (IsExcalidraw(path))
+        {
+            return await excalidrawRenderer.RenderExcalidraw(shareKey, path, storageItem);
+        }
+
+        // should go before raw because markdown must not be returned raw (sensitive frontmatter)
+        if (IsMarkdown(path))
+        {
+            var result = await markdownRenderer
+                .RenderMarkdown(shareKey, path, storageItem, accessToken);
+            if (result is MarkdownShare markdownShare)
+            {
+                markdownShare.Nav = ev.Navigation;
+            }
+
+            return result;
+        }
+
         if (asType == ShareType.Raw) return new RawShare
         {
             Path = path,
@@ -254,23 +273,6 @@ public class ShareService(IOptions<ShareSettings> shareSettings,
             {
                 ContentUrl = $"{_shareSettings.BasePublicUrl}/{shareKey}?f=raw",
             };
-        }
-
-        if (IsExcalidraw(path))
-        {
-            return await excalidrawRenderer.RenderExcalidraw(shareKey, path, storageItem);
-        }
-
-        if (IsMarkdown(path))
-        {
-            var result = await markdownRenderer
-                .RenderMarkdown(shareKey, path, storageItem, accessToken);
-            if (result is MarkdownShare markdownShare)
-            {
-                markdownShare.Nav = ev.Navigation;
-            }
-
-            return result;
         }
 
         return new RawShare
