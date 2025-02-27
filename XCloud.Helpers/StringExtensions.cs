@@ -8,7 +8,8 @@ public static class StringExtensions
 
     private static readonly char[] InvalidPathCharacters = Path
         .GetInvalidFileNameChars()
-        .Union(['?', '\\', '/', ':', ';', '*', '"', '<', '>', '|', '\''])
+        // These characters cause issues from various points of view: filesystem compatibility, Markdown links compatibility, OS-specific limitations, etc.
+        .Union(['!', '?', '\\', '/', ':', ';', '*', '"', '<', '>', '|', '\'', ' ', '(', ')', '[', ']'])
         .ToArray();
 
     public static string CreateFileName(this string source)
@@ -25,11 +26,10 @@ public static class StringExtensions
 
         return fileName
             .Replace("__", "_")
-            .Replace(" _", " ")
-            .Replace("_ ", " ")
-            .Replace("  ", " ")
+            .Replace("-_", "-")
+            .Replace("_-", "-")
             .ToString()
-            .Trim(' ', '_', '.');
+            .Trim('-', '_', '.');
     }
 
     public static double? ToNullDouble(this string? src) => double.TryParse(src, out var result) ? result : null;
