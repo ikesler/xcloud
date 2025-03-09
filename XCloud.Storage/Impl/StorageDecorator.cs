@@ -1,6 +1,6 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
-using Serilog;
+using DotNext.Threading;
 using XCloud.Core;
 using XCloud.Core.Settings;
 using XCloud.Ext.Storage;
@@ -31,18 +31,32 @@ public class StorageDecorator(IStorageProvider provider): IStorage
 
     public Task<bool> Exists(string key) => provider.Exists(key);
 
-    public Task Rm(string key) => provider.Rm(key);
+    public async Task Rm(string key)
+    {
+        using var @lock = await Lock(key);
+        await provider.Rm(key);
+    }
 
     public Task<StorageMetaItem[]> Ls(string keyPrefix) => provider.Ls(keyPrefix);
 
-    public Task<StorageMetaItem?> Stat(string key) => provider.Stat(key);
-
-    public Task<StorageItem?> Get(string key, long firstByte = 0, long? lastByte = null)
+    public async Task<StorageMetaItem?> Stat(string key)
     {
-        return provider.Get(key, firstByte, lastByte);
+        using var @lock = await Lock(key);
+        return await provider.Stat(key);
     }
 
-    public Task Put(string key, Stream content) => provider.Put(key, content);
+    public async Task<StorageItem?> Get(string key, long firstByte = 0, long? lastByte = null)
+    {
+        using var @lock = await Lock(key);
+        return await provider.Get(key, firstByte, lastByte);
+    }
+
+    public async Task Put(string key, Stream content)
+    {
+        using var @lock = await Lock(key);
+
+        await provider.Put(key, content);
+    }
 
     public async Task<XCloudSettings> LoadSettings()
     {
@@ -84,6 +98,8 @@ public class StorageDecorator(IStorageProvider provider): IStorage
 
     public async Task<string?> KvGet(string key)
     {
+        using var @lock = await Lock(KvFile, "kv");
+
         var kvItem = await Get(KvFile);
         if (kvItem != null)
         {
@@ -96,6 +112,8 @@ public class StorageDecorator(IStorageProvider provider): IStorage
 
     public async Task KvSet(string key, string value)
     {
+        using var @lock = await Lock(KvFile, "kv");
+
         var kvItem = await Get(KvFile);
         Dictionary<string, string> kv;
         if (kvItem != null)
@@ -113,53 +131,10 @@ public class StorageDecorator(IStorageProvider provider): IStorage
         await Put(KvFile, JsonSerializer.Serialize(kv).ToStream());
     }
 
-    public async Task<ILockHandle?> Lock(string key, TimeSpan? expiresIn = null)
+    public async Task<IDisposable> Lock(string key, string? prefix = null)
     {
-        var token = await GetLock(key);
-        if (token == null) return await PutLock(key, expiresIn);
-        if (token.ExpiresAt < DateTime.UtcNow)
-        {
-            return await PutLock(key, expiresIn);
-        }
-        Log.Warning("Could not acquire {Lock} lock. A token exists and not expired: {Token}", key, token);
-        return null;
-    }
-
-    private async Task<LockToken?> GetLock(string key)
-    {
-        var lockPath = LockFolder / key;
-
-        var lockItem = await Get(lockPath);
-        if (lockItem != null)
-        {
-            return JsonSerializer.Deserialize<LockToken>(await lockItem.Content.ReadAllStringAsync())
-                ?? throw new XCloudException("Could not deserialize lock token");
-        }
-
-        return null;
-    }
-
-    private async Task<LockHandle> PutLock(string key, TimeSpan? expiresIn)
-    {
-        var lockPath = LockFolder / key;
-
-        var token = new LockToken(Guid.NewGuid().ToString(), expiresIn.HasValue ? DateTime.UtcNow + expiresIn : null);
-        await Put(lockPath, JsonSerializer.Serialize(token).ToStream());
-
-        return new LockHandle(async span =>
-        {
-            var actualToken = await GetLock(key);
-            if (actualToken != token) throw new XCloudException("Lock has been lost");
-            token = actualToken with
-            {
-                ExpiresAt = DateTime.UtcNow + span
-            };
-            await Put(lockPath, JsonSerializer.Serialize(token).ToStream());
-        }, async () =>
-        {
-            var actualToken = await GetLock(key);
-            if (actualToken != token) throw new XCloudException("Lock has been lost");
-            await Rm(lockPath);
-        });
+        // TODO: does not support multiple instances of the app
+        // Change to a distributed lock solution when it becomes relevant
+        return await $"{prefix ?? "storage_key"}:{key}".AcquireLockAsync(TimeSpan.FromSeconds(10));
     }
 }

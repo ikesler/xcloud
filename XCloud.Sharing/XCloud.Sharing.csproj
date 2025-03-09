@@ -10,7 +10,7 @@
     <ProjectReference Include="..\XCloud.Storage\XCloud.Storage.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DotNext.Threading" Version="5.17.2" />
+    <PackageReference Include="DotNext.Threading" Version="5.19.1" />
     <PackageReference Include="Markdig" Version="0.40.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.1" />

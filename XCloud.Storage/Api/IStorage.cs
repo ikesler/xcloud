@@ -7,7 +7,7 @@ public interface IStorage: IStorageProvider
 {
     Task<XCloudSettings> LoadSettings();
     Task<DateTime> LocalTime();
-    Task<ILockHandle?> Lock(string key, TimeSpan? expiresIn = null);
+    Task<IDisposable> Lock(string key, string? prefix = null);
     Task<T?> GetJson<T>(string key);
     Task PutJson(string key, object value);
     Task<string?> KvGet(string key);

@@ -49,44 +49,40 @@ public class AiTitleAutomation(IStorage storage,
         // Key in the KV storage to store the last run date
         var lastRunKey = $"{LastRunKey}:{directory}";
 
-        var lockHandle = await storage.Lock(nameof(AiTitleAutomation), TimePerNote);
-        if (lockHandle == null) return;
-        await using (lockHandle)
+        using var lockHandle = await storage.Lock(nameof(AiTitleAutomation), "automation");
+
+        if (fillGaps || !DateTime.TryParse(await storage.KvGet(lastRunKey), CultureInfo.InvariantCulture, out var lastRunDate))
         {
-            if (fillGaps || !DateTime.TryParse(await storage.KvGet(lastRunKey), CultureInfo.InvariantCulture, out var lastRunDate))
-            {
-                lastRunDate = DateTime.MinValue;
-            }
-
-            var notesAfter = DateTime.UtcNow.ToString("s");
-
-            var filesQuery = (await storage.Ls(directory))
-                .Where(x => x.Type == StorageMetaItemType.File);
-
-            if (!overrideTitle)
-            {
-                filesQuery = filesQuery.Where(x => x.UpdatedAtUtc > lastRunDate);
-            }
-
-            if (!string.IsNullOrWhiteSpace(fileName))
-            {
-                filesQuery = filesQuery.Where(x => x.Name == fileName);
-            }
-
-            var files = filesQuery.OrderBy(x => x.Name).ToArray();
-
-            Log.Information("Processing {FilesCnt} new files in '{Directory}' since {LastRunDate}",
-                files.Length,
-                directory,
-                lastRunDate);
-            foreach (var file in files)
-            {
-                await HandleFile(file, overrideTitle);
-                await lockHandle.ExpireIn(TimePerNote);
-            }
-
-            await storage.KvSet(lastRunKey, notesAfter);
+            lastRunDate = DateTime.MinValue;
         }
+
+        var notesAfter = DateTime.UtcNow.ToString("s");
+
+        var filesQuery = (await storage.Ls(directory))
+            .Where(x => x.Type == StorageMetaItemType.File);
+
+        if (!overrideTitle)
+        {
+            filesQuery = filesQuery.Where(x => x.UpdatedAtUtc > lastRunDate);
+        }
+
+        if (!string.IsNullOrWhiteSpace(fileName))
+        {
+            filesQuery = filesQuery.Where(x => x.Name == fileName);
+        }
+
+        var files = filesQuery.OrderBy(x => x.Name).ToArray();
+
+        Log.Information("Processing {FilesCnt} new files in '{Directory}' since {LastRunDate}",
+            files.Length,
+            directory,
+            lastRunDate);
+        foreach (var file in files)
+        {
+            await HandleFile(file, overrideTitle);
+        }
+
+        await storage.KvSet(lastRunKey, notesAfter);
     }
 
     private async Task HandleFile(StorageMetaItem file, bool overrideTitle)
